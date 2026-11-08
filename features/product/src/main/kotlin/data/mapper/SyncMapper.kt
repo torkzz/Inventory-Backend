@@ -1,10 +1,13 @@
 package data.mapper
 
+import data.table.product.InventoryMovementTable
 import data.table.product.ProductTable
 import data.table.product.StockBatchTable
 import domain.model.BatchId
 import domain.model.CategoryId
+import domain.model.InventoryMovement
 import domain.model.LocationId
+import domain.model.MovementId
 import domain.model.ProductId
 import domain.model.sync.SyncProduct
 import domain.model.sync.SyncStockBatch
@@ -28,6 +31,8 @@ fun ResultRow.toSyncProduct(): SyncProduct =
         sellingPrice = this[ProductTable.sellingPrice],
         quantity = this[ProductTable.quantity],
         minimumQuantity = this[ProductTable.minimumQuantity],
+        isArchived = this[ProductTable.isArchived],
+        version = this[ProductTable.version],
         createdAt = this[ProductTable.createdAt],
         lastUpdated = this[ProductTable.lastUpdated]
     )
@@ -44,4 +49,20 @@ fun ResultRow.toSyncStockBatch(): SyncStockBatch =
         supplier = this[StockBatchTable.supplier],
         createdAt = this[StockBatchTable.createdAt],
         lastUpdated = this[StockBatchTable.lastUpdated]
+    )
+
+fun ResultRow.toInventoryMovement(): InventoryMovement =
+    InventoryMovement(
+        movementId = MovementId(this[InventoryMovementTable.movementId]),
+        productId = ProductId(this[InventoryMovementTable.productId]),
+        groupId = GroupId(this[InventoryMovementTable.groupId]),
+        movementType = this[InventoryMovementTable.movementType],
+        quantity = this[InventoryMovementTable.quantity],
+        unit = this[InventoryMovementTable.unit],
+        reason = this[InventoryMovementTable.reason],
+        source = this[InventoryMovementTable.movementSource],
+        deviceId = this[InventoryMovementTable.deviceId],
+        createdBy = this[InventoryMovementTable.createdBy],
+        createdAt = this[InventoryMovementTable.createdAt],
+        serverUpdatedAt = this[InventoryMovementTable.serverUpdatedAt]
     )

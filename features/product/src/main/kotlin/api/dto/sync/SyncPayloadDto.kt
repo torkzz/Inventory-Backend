@@ -1,5 +1,6 @@
 package api.dto.sync
 
+import api.dto.movement.InventoryMovementDto
 import api.dto.request.CategoryRequest
 import api.dto.request.LocationRequest
 import kotlinx.serialization.Serializable
@@ -20,5 +21,7 @@ data class SyncPayloadDto(
 
     val createdBatches: List<SyncStockBatchDto> = emptyList(),
     val updatedBatches: List<SyncStockBatchDto> = emptyList(),
-    val deletedBatches: List<String> = emptyList()
+    val deletedBatches: List<String> = emptyList(),
+
+    val movements: List<InventoryMovementDto> = emptyList()
 )

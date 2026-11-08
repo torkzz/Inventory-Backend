@@ -41,3 +41,4 @@ secrets.conf
 .Trashes
 ehthumbs.db
 Thumbs.db
+target/

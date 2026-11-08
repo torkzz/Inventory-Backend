@@ -3,6 +3,7 @@ package domain.model.sync
 import domain.model.BatchId
 import domain.model.Category
 import domain.model.CategoryId
+import domain.model.InventoryMovement
 import domain.model.Location
 import domain.model.LocationId
 import domain.model.ProductId
@@ -22,5 +23,7 @@ data class SyncPayload (
 
     val createdBatches: List<SyncStockBatch>,
     val updatedBatches: List<SyncStockBatch>,
-    val deletedBatches: List<BatchId>
+    val deletedBatches: List<BatchId>,
+
+    val movements: List<InventoryMovement> = emptyList()
 )

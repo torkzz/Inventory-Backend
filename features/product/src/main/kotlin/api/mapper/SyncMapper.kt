@@ -1,5 +1,6 @@
 package api.mapper
 
+import api.dto.movement.InventoryMovementDto
 import api.dto.sync.SyncPayloadDto
 import api.dto.sync.SyncProductDto
 import api.dto.sync.SyncPullResponseDto
@@ -7,7 +8,9 @@ import api.dto.sync.SyncPushResponseDto
 import api.dto.sync.SyncStockBatchDto
 import domain.model.BatchId
 import domain.model.CategoryId
+import domain.model.InventoryMovement
 import domain.model.LocationId
+import domain.model.MovementId
 import domain.model.ProductId
 import domain.model.sync.SyncPayload
 import domain.model.sync.SyncProduct
@@ -34,6 +37,8 @@ fun SyncProductDto.toDomain(): SyncProduct =
         sellingPrice = this.sellingPrice,
         quantity = this.quantity,
         minimumQuantity = this.minimumQuantity,
+        isArchived = this.isArchived,
+        version = this.version,
         createdAt = this.createdAt,
         lastUpdated = this.lastUpdated
     )
@@ -52,6 +57,38 @@ fun SyncStockBatchDto.toDomain(): SyncStockBatch =
         lastUpdated = this.lastUpdated
     )
 
+fun InventoryMovementDto.toDomain(groupId: GroupId): InventoryMovement =
+    InventoryMovement(
+        movementId = MovementId(this.movementId),
+        productId = ProductId(this.productId),
+        groupId = groupId,
+        movementType = this.movementType,
+        quantity = this.quantity,
+        unit = this.unit.ifBlank { "pcs" },
+        reason = this.reason?.trim(),
+        source = this.source,
+        deviceId = this.deviceId,
+        createdBy = this.createdBy,
+        createdAt = this.createdAt,
+        serverUpdatedAt = this.serverUpdatedAt
+    )
+
+fun InventoryMovement.toDto(): InventoryMovementDto =
+    InventoryMovementDto(
+        movementId = this.movementId.value,
+        productId = this.productId.value,
+        groupId = this.groupId.value,
+        movementType = this.movementType,
+        quantity = this.quantity,
+        unit = this.unit,
+        reason = this.reason,
+        source = this.source,
+        deviceId = this.deviceId,
+        createdBy = this.createdBy,
+        createdAt = this.createdAt,
+        serverUpdatedAt = this.serverUpdatedAt
+    )
+
 fun SyncPayloadDto.toDomain(groupId: GroupId): SyncPayload =
     SyncPayload(
         createdCategories = this.createdCategories.map { it.toDomain(groupId) },
@@ -68,7 +105,9 @@ fun SyncPayloadDto.toDomain(groupId: GroupId): SyncPayload =
 
         createdBatches = this.createdBatches.map { it.toDomain() },
         updatedBatches = this.updatedBatches.map { it.toDomain() },
-        deletedBatches = this.deletedBatches.map { BatchId(it) }
+        deletedBatches = this.deletedBatches.map { BatchId(it) },
+
+        movements = this.movements.map { it.toDomain(groupId) }
     )
 
 fun SyncProduct.toDto(): SyncProductDto =
@@ -88,6 +127,8 @@ fun SyncProduct.toDto(): SyncProductDto =
         sellingPrice = this.sellingPrice,
         quantity = this.quantity,
         minimumQuantity = this.minimumQuantity,
+        isArchived = this.isArchived,
+        version = this.version,
         createdAt = this.createdAt,
         lastUpdated = this.lastUpdated
     )
@@ -122,6 +163,7 @@ fun SyncPullResponse.toDto(): SyncPullResponseDto =
         locations = this.locations.map { it.toResponse() },
         products = this.products.map { it.toDto() },
         batches = this.batches.map { it.toDto() },
+        movements = this.movements.map { it.toDto() },
 
         deletedCategories = this.deletedCategories.map { it.value },
         deletedLocations = this.deletedLocations.map { it.value },

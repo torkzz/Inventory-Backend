@@ -1,5 +1,6 @@
 package com.kevinfreyap
 
+import com.kevinfreyap.plugins.configureCors
 import com.kevinfreyap.plugins.configureDI
 import com.kevinfreyap.plugins.configureLogging
 import com.kevinfreyap.plugins.configureProxySupport
@@ -22,6 +23,7 @@ fun Application.module() {
     configureResources()
 
     configureProxySupport()
+    configureCors()
     configureRateLimit()
     configureValidation()
     configureSockets()

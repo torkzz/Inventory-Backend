@@ -19,6 +19,8 @@ data class SyncProductDto(
     val sellingPrice: Double = 0.0,
     val quantity: Int = 0,
     val minimumQuantity: Int = 0,
+    val isArchived: Boolean = false,
+    val version: Long = 1L,
     val createdAt: Long,
     val lastUpdated: Long
 )

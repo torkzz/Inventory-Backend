@@ -30,6 +30,8 @@ object ProductTable: Table("product") {
     val sellingPrice = double("selling_price").default(0.0)
     val quantity = integer("quantity").default(0)
     val minimumQuantity = integer("minimum_quantity").default(0)
+    val isArchived = bool("is_archived").default(false)
+    val version = long("version").default(1L)
     val createdAt = long("created_at")
     val lastUpdated = long("last_updated")
     val serverUpdatedAt = long("server_updated_at")

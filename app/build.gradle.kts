@@ -30,6 +30,7 @@ dependencies {
     implementation(ktorLibs.server.statusPages)
     implementation(ktorLibs.server.websockets)
     implementation(ktorLibs.server.auth.jwt)
+    implementation(ktorLibs.server.cors)
     implementation(ktorLibs.server.callLogging)
     implementation(libs.logback.classic)
 

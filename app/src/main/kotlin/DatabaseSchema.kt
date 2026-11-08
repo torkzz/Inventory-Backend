@@ -6,6 +6,7 @@ import data.table.user.UserGroupTable
 import data.table.user.UserTable
 import data.table.product.CategoryTable
 import data.table.product.DeletedTable
+import data.table.product.InventoryMovementTable
 import data.table.product.LocationTable
 import data.table.product.ProductTable
 import data.table.product.StockBatchTable
@@ -20,6 +21,7 @@ fun initializeDatabaseSchema() {
             LocationTable,
             ProductTable,
             StockBatchTable,
+            InventoryMovementTable,
             DeletedTable,
 
             UserTable,
@@ -34,6 +36,7 @@ fun initializeDatabaseSchema() {
             LocationTable,
             ProductTable,
             StockBatchTable,
+            InventoryMovementTable,
             DeletedTable,
 
             UserTable,
@@ -45,6 +48,11 @@ fun initializeDatabaseSchema() {
 
         try {
             exec("ALTER TABLE product ALTER COLUMN category_id DROP NOT NULL;")
+        } catch (_: Exception) {}
+
+        try {
+            exec("ALTER TABLE product ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT FALSE;")
+            exec("ALTER TABLE product ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 1;")
         } catch (_: Exception) {}
     }
 }

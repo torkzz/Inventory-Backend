@@ -3,6 +3,7 @@ package com.kevinfreyap
 import api.route.authRoute
 import api.route.categoryRoutes
 import api.route.groupRoute
+import api.route.inventoryMovementRoutes
 import api.route.locationRoutes
 import api.route.memberRoute
 import io.ktor.server.application.Application
@@ -24,6 +25,7 @@ fun Application.configureRouting() {
         categoryRoutes()
         locationRoutes()
         stockBatchRoutes()
+        inventoryMovementRoutes()
         syncRoute()
         authRoute()
         userRoute()

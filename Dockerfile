@@ -1,17 +1,19 @@
-# Builder
-FROM gradle:8-jdk17 AS build
-COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src
-RUN gradle :app:buildFatJar --no-daemon
+# Build stage
+FROM rust:1.85-slim AS builder
+WORKDIR /usr/src/inventory-backend
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+RUN cargo build --release
 
-# Runner
-FROM eclipse-temurin:21-jre
+# Runtime stage
+FROM debian:bookworm-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -u 1000 -s /bin/bash appuser
+COPY --from=builder /usr/src/inventory-backend/target/release/inventory-backend /app/inventory-backend
+RUN mkdir -p /app/uploads && chown -R appuser:appuser /app
+USER appuser
 EXPOSE 8080
-
-RUN addgroup --system ktor && \
-    adduser --system --ingroup ktor ktoruser
-
-RUN mkdir /app && chown ktoruser:ktor /app
-COPY --chown=ktoruser:ktor --from=build /home/gradle/src/app/build/libs/*-all.jar /app/ktor-backend.jar
-USER ktoruser
-ENTRYPOINT ["java", "-Djava.io.tmpdir=/tmp", "-jar", "/app/ktor-backend.jar"]
+ENV PORT=8080 HOST=0.0.0.0
+ENTRYPOINT ["/app/inventory-backend"]

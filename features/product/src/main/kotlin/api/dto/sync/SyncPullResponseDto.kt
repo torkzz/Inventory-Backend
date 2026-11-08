@@ -1,5 +1,6 @@
 package api.dto.sync
 
+import api.dto.movement.InventoryMovementDto
 import api.dto.response.CategoryResponse
 import api.dto.response.LocationResponse
 import kotlinx.serialization.Serializable
@@ -10,6 +11,7 @@ data class SyncPullResponseDto(
     val locations: List<LocationResponse>,
     val products: List<SyncProductDto>,
     val batches: List<SyncStockBatchDto>,
+    val movements: List<InventoryMovementDto> = emptyList(),
 
     val deletedCategories: List<String>,
     val deletedLocations: List<String>,

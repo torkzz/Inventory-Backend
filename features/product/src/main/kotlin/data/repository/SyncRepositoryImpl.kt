@@ -3,10 +3,12 @@ package data.repository
 import DatabaseFactory.dbQuery
 import data.table.product.CategoryTable
 import data.table.product.DeletedTable
+import data.table.product.InventoryMovementTable
 import data.table.product.LocationTable
 import data.table.product.ProductTable
 import data.table.product.StockBatchTable
 import data.mapper.toCategory
+import data.mapper.toInventoryMovement
 import data.mapper.toLocation
 import data.mapper.toSyncProduct
 import data.mapper.toSyncStockBatch
@@ -24,9 +26,11 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.plus
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import org.slf4j.LoggerFactory
 import result.DomainResult
 import result.ErrorType
@@ -169,6 +173,8 @@ class SyncRepositoryImpl: SyncRepository {
                         this[ProductTable.sellingPrice] = product.sellingPrice
                         this[ProductTable.quantity] = product.quantity
                         this[ProductTable.minimumQuantity] = product.minimumQuantity
+                        this[ProductTable.isArchived] = product.isArchived
+                        this[ProductTable.version] = product.version
                         this[ProductTable.createdAt] = product.createdAt
                         this[ProductTable.lastUpdated] = product.lastUpdated
                         this[ProductTable.serverUpdatedAt] = timeStamp
@@ -194,6 +200,61 @@ class SyncRepositoryImpl: SyncRepository {
                         this[StockBatchTable.createdAt] = batch.createdAt
                         this[StockBatchTable.lastUpdated] = batch.lastUpdated
                         this[StockBatchTable.serverUpdatedAt] = timeStamp
+                    }
+                }
+
+                // Inventory movements ledger (idempotent insert)
+                if (syncPayload.movements.isNotEmpty()) {
+                    val existingMovementIds = InventoryMovementTable
+                        .selectAll()
+                        .where {
+                            (InventoryMovementTable.movementId inList syncPayload.movements.map { it.movementId.value }) and
+                            (InventoryMovementTable.groupId eq groupId.value)
+                        }
+                        .map { it[InventoryMovementTable.movementId] }
+                        .toSet()
+
+                    val newMovements = syncPayload.movements.filter { it.movementId.value !in existingMovementIds }
+
+                    if (newMovements.isNotEmpty()) {
+                        InventoryMovementTable.batchUpsert(
+                            data = newMovements,
+                            keys = arrayOf(InventoryMovementTable.movementId)
+                        ) { m ->
+                            this[InventoryMovementTable.movementId] = m.movementId.value
+                            this[InventoryMovementTable.productId] = m.productId.value
+                            this[InventoryMovementTable.groupId] = groupId.value
+                            this[InventoryMovementTable.movementType] = m.movementType
+                            this[InventoryMovementTable.quantity] = m.quantity
+                            this[InventoryMovementTable.unit] = m.unit
+                            this[InventoryMovementTable.reason] = m.reason
+                            this[InventoryMovementTable.movementSource] = m.source
+                            this[InventoryMovementTable.deviceId] = m.deviceId
+                            this[InventoryMovementTable.createdBy] = m.createdBy
+                            this[InventoryMovementTable.createdAt] = m.createdAt
+                            this[InventoryMovementTable.serverUpdatedAt] = timeStamp
+                        }
+
+                        // Apply new movements to update product stock balance transactionally
+                        for (m in newMovements) {
+                            val delta = when (m.movementType.uppercase()) {
+                                "STOCK_IN" -> m.quantity
+                                "STOCK_OUT" -> -m.quantity
+                                "ADJUSTMENT" -> m.quantity
+                                "INITIAL_BALANCE" -> m.quantity
+                                else -> 0
+                            }
+                            if (delta != 0) {
+                                ProductTable.update({
+                                    (ProductTable.productId eq m.productId.value) and
+                                    (ProductTable.groupId eq groupId.value)
+                                }) {
+                                    it[quantity] = quantity + delta
+                                    it[lastUpdated] = timeStamp
+                                    it[serverUpdatedAt] = timeStamp
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -245,6 +306,13 @@ class SyncRepositoryImpl: SyncRepository {
                     }
                     .map { it.toSyncStockBatch() }
 
+                val updatedMovements = InventoryMovementTable
+                    .selectAll()
+                    .where {
+                        (InventoryMovementTable.serverUpdatedAt greater updatedAfter) and (InventoryMovementTable.groupId eq groupId.value)
+                    }
+                    .map { it.toInventoryMovement() }
+
                 val deleted = DeletedTable
                     .selectAll()
                     .where {
@@ -267,6 +335,7 @@ class SyncRepositoryImpl: SyncRepository {
                     locations = updatedLocations,
                     products = updatedProduct,
                     batches = updatedBatch,
+                    movements = updatedMovements,
                     deletedCategories = deletedCategoryIds,
                     deletedLocations = deletedLocationIds,
                     deletedProducts = deletedProductIds,

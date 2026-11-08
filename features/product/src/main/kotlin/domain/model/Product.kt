@@ -21,6 +21,8 @@ data class Product(
     val sellingPrice: Double = 0.0,
     val quantity: Int = 0,
     val minimumQuantity: Int = 0,
+    val isArchived: Boolean = false,
+    val version: Long = 1L,
     val batches: List<StockBatch> = emptyList(),
     val createdAt: Long,
     val lastUpdated: Long
