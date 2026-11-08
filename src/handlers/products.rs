@@ -393,13 +393,12 @@ pub async fn update_product(
             unit = $9,
             purchase_price = $10,
             selling_price = $11,
-            quantity = $12,
-            minimum_quantity = $13,
-            is_archived = $14,
+            minimum_quantity = $12,
+            is_archived = $13,
             version = version + 1,
-            last_updated = $15,
-            server_updated_at = $15
-        WHERE product_id = $16
+            last_updated = $14,
+            server_updated_at = $14
+        WHERE product_id = $15
         "#,
     )
     .bind(payload.category_id.as_deref())
@@ -419,7 +418,6 @@ pub async fn update_product(
     .bind(&payload.unit)
     .bind(payload.purchase_price)
     .bind(payload.selling_price)
-    .bind(payload.quantity)
     .bind(payload.minimum_quantity)
     .bind(payload.is_archived)
     .bind(now)
