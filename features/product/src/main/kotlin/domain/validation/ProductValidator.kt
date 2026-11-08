@@ -27,11 +27,13 @@ class ProductValidator (
             )
         )
 
-        when(
-            val result = categoryValidator.validateCategory(product.category)
-        ) {
-            is DomainResult.Error -> errors.add(result.message)
-            is DomainResult.Success -> {}
+        product.category?.let { cat ->
+            when(
+                val result = categoryValidator.validateCategory(cat)
+            ) {
+                is DomainResult.Error -> errors.add(result.message)
+                is DomainResult.Success -> {}
+            }
         }
 
         product.batches.forEach { batch ->

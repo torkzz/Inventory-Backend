@@ -31,7 +31,7 @@ class ProductRepositoryImpl: ProductRepository {
 
     override suspend fun getProducts(groupId: GroupId): DomainResult<List<Product>> = dbQuery {
         try {
-            val productRows = ProductTable.innerJoin(CategoryTable)
+            val productRows = ProductTable.leftJoin(CategoryTable)
                 .selectAll()
                 .where { ProductTable.groupId eq groupId.value }
                 .toList()
@@ -65,7 +65,7 @@ class ProductRepositoryImpl: ProductRepository {
         try {
             val idValue = productId.value
 
-            val productRow = ProductTable.innerJoin(CategoryTable)
+            val productRow = ProductTable.leftJoin(CategoryTable)
                 .selectAll()
                 .where { (ProductTable.productId eq idValue) and (ProductTable.groupId eq groupId.value) }
                 .singleOrNull()
@@ -94,14 +94,19 @@ class ProductRepositoryImpl: ProductRepository {
 
             val insertStatement = ProductTable.insert {
                 it[productId] = product.productId.value
-                it[categoryId] = product.category.categoryId.value
+                it[categoryId] = product.category?.categoryId?.value
                 it[this.groupId] = groupId.value
                 it[name] = product.name
+                it[brand] = product.brand
                 it[description] = product.description
-                it[barcode] = product.barcode
+                it[barcode] = if (product.barcode.isNullOrBlank()) null else product.barcode.trim()
                 it[barcodeFormat] = product.barcodeFormat
-                it[sku] = product.sku
+                it[sku] = if (product.sku.isNullOrBlank()) null else product.sku.trim()
                 it[imageUri] = product.imageUri
+                it[unit] = product.unit
+                it[purchasePrice] = product.purchasePrice
+                it[sellingPrice] = product.sellingPrice
+                it[quantity] = product.quantity
                 it[minimumQuantity] = product.minimumQuantity
                 it[createdAt] = product.createdAt
                 it[lastUpdated] = product.lastUpdated
@@ -148,13 +153,18 @@ class ProductRepositoryImpl: ProductRepository {
             val updatedRows = ProductTable.update({
                 (ProductTable.productId eq product.productId.value) and (ProductTable.groupId eq groupId.value)
             }) {
-                it[categoryId] = product.category.categoryId.value
+                it[categoryId] = product.category?.categoryId?.value
                 it[name] = product.name
+                it[brand] = product.brand
                 it[description] = product.description
-                it[barcode] = product.barcode
+                it[barcode] = if (product.barcode.isNullOrBlank()) null else product.barcode.trim()
                 it[barcodeFormat] = product.barcodeFormat
-                it[sku] = product.sku
+                it[sku] = if (product.sku.isNullOrBlank()) null else product.sku.trim()
                 it[imageUri] = product.imageUri
+                it[unit] = product.unit
+                it[purchasePrice] = product.purchasePrice
+                it[sellingPrice] = product.sellingPrice
+                it[quantity] = product.quantity
                 it[minimumQuantity] = product.minimumQuantity
                 it[lastUpdated] = product.lastUpdated
                 it[serverUpdatedAt] = System.currentTimeMillis()

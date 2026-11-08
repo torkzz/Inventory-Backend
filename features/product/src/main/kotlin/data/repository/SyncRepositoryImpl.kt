@@ -155,14 +155,19 @@ class SyncRepositoryImpl: SyncRepository {
                         keys = arrayOf(ProductTable.productId),
                     ) { product ->
                         this[ProductTable.productId] = product.productId.value
-                        this[ProductTable.categoryId] = product.categoryId.value
+                        this[ProductTable.categoryId] = product.categoryId?.value
                         this[ProductTable.groupId] = groupId.value
                         this[ProductTable.name] = product.name
+                        this[ProductTable.brand] = product.brand
                         this[ProductTable.description] = product.description
-                        this[ProductTable.barcode] = product.barcode
+                        this[ProductTable.barcode] = if (product.barcode.isNullOrBlank()) null else product.barcode.trim()
                         this[ProductTable.barcodeFormat] = product.barcodeFormat
-                        this[ProductTable.sku] = product.sku
+                        this[ProductTable.sku] = if (product.sku.isNullOrBlank()) null else product.sku.trim()
                         this[ProductTable.imageUri] = product.imageUri
+                        this[ProductTable.unit] = product.unit
+                        this[ProductTable.purchasePrice] = product.purchasePrice
+                        this[ProductTable.sellingPrice] = product.sellingPrice
+                        this[ProductTable.quantity] = product.quantity
                         this[ProductTable.minimumQuantity] = product.minimumQuantity
                         this[ProductTable.createdAt] = product.createdAt
                         this[ProductTable.lastUpdated] = product.lastUpdated

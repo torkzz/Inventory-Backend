@@ -51,6 +51,7 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
+      - "192.168.0.170:9000:9000"
     volumes:
       - minio_data:/data
     secrets:
@@ -66,6 +67,7 @@ services:
       - .env
     ports:
       - "127.0.0.1:8081:8080"
+      - "192.168.0.170:8081:8080"
     secrets:
       - db_pass
       - minio_pass

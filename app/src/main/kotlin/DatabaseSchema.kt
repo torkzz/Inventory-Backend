@@ -28,5 +28,23 @@ fun initializeDatabaseSchema() {
             RefreshTokenTable,
             GroupInviteTable
         )
+
+        SchemaUtils.createMissingTablesAndColumns(
+            CategoryTable,
+            LocationTable,
+            ProductTable,
+            StockBatchTable,
+            DeletedTable,
+
+            UserTable,
+            GroupTable,
+            UserGroupTable,
+            RefreshTokenTable,
+            GroupInviteTable
+        )
+
+        try {
+            exec("ALTER TABLE product ALTER COLUMN category_id DROP NOT NULL;")
+        } catch (_: Exception) {}
     }
 }

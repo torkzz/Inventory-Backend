@@ -1,6 +1,7 @@
 package domain.usecase
 
 import domain.model.AuthTokens
+import domain.util.hashWithSHA256
 import model.User
 import model.UserId
 import domain.model.UserSession
@@ -98,7 +99,7 @@ class RegisterUseCase (
                 
                 authRepository.saveRefreshToken(
                     userId = createdUser.userId,
-                    token = refreshToken,
+                    token = refreshToken.hashWithSHA256(),
                     expiresAt = expiresAt
                 )
 

@@ -10,8 +10,8 @@ object ProductTable: Table("product") {
     val categoryId = reference(
         "category_id",
         CategoryTable.categoryId,
-        ReferenceOption.RESTRICT
-    )
+        ReferenceOption.SET_NULL
+    ).nullable()
     val groupId = reference(
         name = "group_id",
         refColumn = GroupTable.groupId,
@@ -19,11 +19,16 @@ object ProductTable: Table("product") {
     )
 
     val name = varchar("name", 255)
+    val brand = varchar("brand", 255).nullable()
     val description = text("description").nullable()
     val barcode = varchar("barcode", 64).nullable()
     val barcodeFormat = varchar("barcode_format", 64).nullable()
     val sku = varchar("sku", 128).nullable()
     val imageUri = text("image_uri").nullable()
+    val unit = varchar("unit", 64).default("pcs")
+    val purchasePrice = double("purchase_price").default(0.0)
+    val sellingPrice = double("selling_price").default(0.0)
+    val quantity = integer("quantity").default(0)
     val minimumQuantity = integer("minimum_quantity").default(0)
     val createdAt = long("created_at")
     val lastUpdated = long("last_updated")

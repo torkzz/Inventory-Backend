@@ -14,14 +14,19 @@ import org.jetbrains.exposed.v1.core.ResultRow
 fun ResultRow.toSyncProduct(): SyncProduct =
     SyncProduct(
         productId = ProductId(this[ProductTable.productId]),
-        categoryId = CategoryId(this[ProductTable.categoryId]),
+        categoryId = this[ProductTable.categoryId]?.let { CategoryId(it) },
         groupId = GroupId(this[ProductTable.groupId]),
         name = this[ProductTable.name],
+        brand = this[ProductTable.brand],
         description = this[ProductTable.description],
         barcode = this[ProductTable.barcode],
         barcodeFormat = this[ProductTable.barcodeFormat],
         sku = this[ProductTable.sku],
         imageUri = this[ProductTable.imageUri],
+        unit = this[ProductTable.unit],
+        purchasePrice = this[ProductTable.purchasePrice],
+        sellingPrice = this[ProductTable.sellingPrice],
+        quantity = this[ProductTable.quantity],
         minimumQuantity = this[ProductTable.minimumQuantity],
         createdAt = this[ProductTable.createdAt],
         lastUpdated = this[ProductTable.lastUpdated]

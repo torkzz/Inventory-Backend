@@ -1,6 +1,5 @@
 package api.route
 
-import api.dto.request.GoogleAuthRequest
 import api.dto.request.LoginRequest
 import api.dto.request.LogoutRequest
 import api.dto.request.RefreshTokenRequest
@@ -34,8 +33,8 @@ class AuthResource {
     class Login(val parent: AuthResource)
 
     @Serializable
-    @Resource("/google")
-    class Google(val parent: AuthResource)
+    @Resource("/local")
+    class Local(val parent: AuthResource)
 
     @Serializable
     @Resource("/refresh")
@@ -101,12 +100,8 @@ fun Route.authRoute() {
             }
         }
 
-        post<AuthResource.Google> {
-            val request = call.receive<GoogleAuthRequest>()
-
-            when(
-                val result = useCases.authWithGoogle(request.idToken)
-            ) {
+        post<AuthResource.Local> {
+            when (val result = useCases.localAccess()) {
                 is DomainResult.Success -> {
                     val session = result.data
                     call.respond(
@@ -119,9 +114,7 @@ fun Route.authRoute() {
                         )
                     )
                 }
-                is DomainResult.Error -> {
-                    call.respond(result.errorType.toHttpStatusCode(), result.message)
-                }
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 

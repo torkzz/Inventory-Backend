@@ -38,7 +38,7 @@ fun SyncProductDto.validate(): List<String> {
     val errors = mutableListOf<String>()
 
     if (productId.isBlank()) errors.add("ProductId cannot be empty")
-    if (categoryId.isBlank()) errors.add("CategoryId cannot be empty")
+    if (categoryId != null && categoryId.isBlank()) errors.add("CategoryId cannot be empty if specified")
     if (name.isBlank()) errors.add("Product name cannot be empty")
 
     if (minimumQuantity < 0) errors.add("Minimum quantity cannot be lower than 0")

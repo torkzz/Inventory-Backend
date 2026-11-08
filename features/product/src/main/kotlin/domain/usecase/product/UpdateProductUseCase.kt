@@ -25,14 +25,12 @@ class UpdateProductUseCase (
         return if (productId != productParams.productId) {
             DomainResult.Error("Product Id doesn't match", ErrorType.BAD_REQUEST)
         } else {
-            val category = when (
-                val categoryResult = categoryRepository.getCategoryById(productParams.categoryId, groupId)
-            ) {
-                is DomainResult.Success -> {
-                    categoryResult.data
+            val category = if (productParams.categoryId != null) {
+                when (val categoryResult = categoryRepository.getCategoryById(productParams.categoryId, groupId)) {
+                    is DomainResult.Success -> categoryResult.data
+                    is DomainResult.Error -> return categoryResult
                 }
-                is DomainResult.Error -> return categoryResult
-            }
+            } else null
 
             val batches = when (
                 val batchesResult = stockBatchAssembler.assembleBatches(productParams.batches, groupId)
@@ -46,11 +44,16 @@ class UpdateProductUseCase (
                 groupId = groupId,
                 category = category,
                 name = productParams.name,
+                brand = productParams.brand,
                 description = productParams.description,
                 barcode = productParams.barcode,
                 barcodeFormat = productParams.barcodeFormat,
                 sku = productParams.sku,
                 imageUri = productParams.imageUri,
+                unit = productParams.unit,
+                purchasePrice = productParams.purchasePrice,
+                sellingPrice = productParams.sellingPrice,
+                quantity = productParams.quantity,
                 minimumQuantity = productParams.minimumQuantity,
                 batches = batches,
                 createdAt = productParams.createdAt,
